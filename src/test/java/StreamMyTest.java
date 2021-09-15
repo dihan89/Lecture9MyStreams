@@ -25,31 +25,37 @@ public class StreamMyTest {
     }
     @Test
     public void test1() {
-        System.out.println("Stream ");
         StreamMy<Person> streamPersons = StreamMy.of(listPersons);
        // Stream str = listPersons.stream();
        // str.forEach(System.out::println);
         //str.forEach(System.out::println);
-
-
        // streamPersons.forEach(System.out::println);
         streamPersons.filter(p -> p.getSurname().equals("Ivanov")).forEach(System.out::println);
     }
 
     @Test
     public void test2() {
-
-        System.out.println("Stream ");
         StreamMy<Person> streamPersons = StreamMy.of(listPersons);
         streamPersons.filter(p ->  p.getSurname()
-                        .equals("Ivanov")).
-                transform(Person::getName).
+                        .equals("Ivanov"))
+            .transform(Person::getName)
+            .filter(s -> s.startsWith("V")).
+                forEach(System.out::println);
+    }
+
+    @Test
+    public void test3() {
+        StreamMy<Person> streamPersons = StreamMy.of(listPersons);
+        streamPersons.filter(p ->  p.getSurname()
+                        .equals("Ivanov"))
+                .transform(Person::getName)
+                .transform(s->s.charAt(0)).
+                filter(c -> c.equals('V')).
                 forEach(System.out::println);
     }
 
     @Test
     public void testMap()  {
-
         System.out.println("Stream & Map ");
         StreamMy<Person> streamPersons = StreamMy.of(listPersons);
         streamPersons.filter(p ->  p.getSurname()
@@ -57,8 +63,6 @@ public class StreamMyTest {
                 toMap(p->p.getAge(),p->p.getName() + " " + p.getSurname()).entrySet().
                 forEach(System.out::println);
 
-        //  streamPersons.forEach(System.out::println);
-        //streamPersons.forEach(x->System.out.println(x.getClass()));
     }
 }
 
