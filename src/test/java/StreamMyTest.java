@@ -2,8 +2,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+
 
 
 public class StreamMyTest {
@@ -21,16 +20,11 @@ public class StreamMyTest {
             add(new Person("Ivanov", "Vladimir", 24, "Russia"));
             add(new Person("Yan", "YYY", 25, "Russia"));
         }};
-
     }
     @Test
     public void test1() {
         StreamMy<Person> streamPersons = StreamMy.of(listPersons);
-       // Stream str = listPersons.stream();
-       // str.forEach(System.out::println);
-        //str.forEach(System.out::println);
-       // streamPersons.forEach(System.out::println);
-        streamPersons.filter(p -> p.getSurname().equals("Ivanov")).forEach(System.out::println);
+               streamPersons.filter(p -> p.getSurname().equals("Ivanov")).forEach(System.out::println);
     }
 
     @Test
@@ -49,8 +43,8 @@ public class StreamMyTest {
         streamPersons.filter(p ->  p.getSurname()
                         .equals("Ivanov"))
                 .transform(Person::getName)
-                .transform(s->s.charAt(0)).
-                filter(c -> c.equals('V')).
+                .filter(s -> s.startsWith("V"))
+                .transform(s->s.substring(0,7)).
                 forEach(System.out::println);
     }
 
@@ -62,7 +56,6 @@ public class StreamMyTest {
                         .equals("Ivanov")).
                 toMap(p->p.getAge(),p->p.getName() + " " + p.getSurname()).entrySet().
                 forEach(System.out::println);
-
     }
 }
 

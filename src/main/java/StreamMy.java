@@ -9,9 +9,9 @@ public class StreamMy<T> {
     private static final String filterMethod = "filterExecute";
     private static final String transformMethod = "transformExecute";
     private List<T> list;
-    private StreamMy<?> startStream = null;
+    private final StreamMy<?> startStream;
     private StreamMy<?> childStream = null;
-    private ArrayList <Pair<Method, Object[]> > sequenceMethods;
+    private final ArrayList <Pair<Method, Object[]> > sequenceMethods;
     private final Class<?> thisClass = this.getClass();
 
     public static <T> StreamMy<T> of(List<T> list) {
@@ -32,15 +32,6 @@ public class StreamMy<T> {
         return this;
     }
 
-    public void forEach(Consumer<? super T> cons) {
-        try {
-            startStream.execute();
-        } catch(NullPointerException exc){
-            throw new IllegalStateException("Stream has been already used");
-        }
-        Spliterator<T> iter = list.spliterator();
-        iter.forEachRemaining(cons);
-    }
 
     public <K> StreamMy<K> transform(Function<? super T, ? extends K> func) {
         try {
@@ -55,6 +46,16 @@ public class StreamMy<T> {
         }
         childStream = new StreamMy<K>(startStream);
         return (StreamMy<K>)childStream;
+    }
+
+    public void forEach(Consumer<? super T> cons) {
+        try {
+            startStream.execute();
+        } catch(NullPointerException exc){
+            throw new IllegalStateException("Stream has been already used");
+        }
+        Spliterator<T> iter = list.spliterator();
+        iter.forEachRemaining(cons);
     }
 
 
@@ -76,25 +77,10 @@ public class StreamMy<T> {
         return returnMap;
     }
 
-    private StreamMy (List<T> list){
-        this.list = list;
-        sequenceMethods = new ArrayList<>();
-        startStream = this;
-    }
-
-    private StreamMy (StreamMy<?> startStream){
-        this.startStream = startStream;
-        sequenceMethods = new ArrayList<>();
-    }
-
-    private void setList(List<?> list){
-        this.list = (List<T>) list;
-    }
 
     private void execute() throws IllegalStateException {
-        try {;
-            for (int i = 0; i < sequenceMethods.size(); ++i) {
-                Pair<Method, Object[]> methPair = sequenceMethods.get(i);
+        try {
+            for (Pair<Method, Object[]> methPair : sequenceMethods) {
                 methPair.method.invoke(this, methPair.args);
             }
             if (childStream!= null) {
@@ -133,6 +119,21 @@ public class StreamMy<T> {
         iter.forEachRemaining((T t) -> transformedStreamList.add(func.apply(t)));
         if(childStream != null)
             childStream.setList(transformedStreamList);
+    }
+
+    private StreamMy (List<T> list){
+        this.list = list;
+        sequenceMethods = new ArrayList<>();
+        startStream = this;
+    }
+
+    private StreamMy (StreamMy<?> startStream){
+        this.startStream = startStream;
+        sequenceMethods = new ArrayList<>();
+    }
+
+    private void setList(List<?> list){
+        this.list = (List<T>) list;
     }
 
     static private class Pair<A,B>{
